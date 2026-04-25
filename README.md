@@ -103,15 +103,15 @@ Make sure Docker Desktop is running before you use the tool.
 Basic usage:
 
 ```bash
-minion run --task "your task description" --repo /path/to/target/repo
+minion --task "your task description" --repo /path/to/target/repo
 ```
 
 Example:
 
 ```bash
-minion run \
+minion \
   --task "Fix the null pointer exception in src/auth/service.py line 42. Expected: login returns 401 on missing password. Steps to reproduce: POST /login with empty body." \
-  --repo /Users/you/projects/client-app
+  --repo /path/to/client-app
 ```
 
 The agent will:
@@ -174,7 +174,7 @@ commands:
 **To use a specific partner config:**
 
 ```bash
-minion run --task "..." --repo /path/to/repo --partner example_client
+minion --task "..." --repo /path/to/repo --partner example_client
 ```
 
 **To add a new partner**, copy an existing config file and adjust the commands:
@@ -182,7 +182,7 @@ minion run --task "..." --repo /path/to/repo --partner example_client
 ```bash
 cp configs/partners/default.yml configs/partners/my_client.yml
 # Edit my_client.yml with the correct lint/test/install commands
-minion run --task "..." --repo /path/to/repo --partner my_client
+minion --task "..." --repo /path/to/repo --partner my_client
 ```
 
 ---
@@ -256,7 +256,7 @@ The agent tried but could not complete the task within the iteration limit. The 
 ```
 dev-box-minions/
 ├── minions/
-│   ├── cli.py              # Entry point: minion run ...
+│   ├── cli.py              # Entry point: minion --task ... --repo ...
 │   ├── config.py           # PartnerConfig — per-client YAML settings
 │   ├── blueprint/          # State machine orchestration
 │   │   ├── engine.py       # BlueprintEngine runner
