@@ -243,8 +243,21 @@ The target repo must have a git remote configured (`git remote -v` should show a
 **"Task qualification failed"**
 The task description is too vague. Read the message — it will list exactly what's missing (acceptance criteria, reproduction steps, code location).
 
-**Docker errors on first run**
-The first run downloads the Dev Container image which can take 2–5 minutes. Subsequent runs are faster because Docker caches the image.
+**"Docker is not running"**
+Start Docker Desktop, or on Linux: `sudo systemctl start docker`. Then retry.
+
+**"devcontainer CLI not found"**
+Install it: `npm install -g @devcontainers/cli`
+
+**"devcontainer up failed" with no clear message**
+Run this manually to see the full error:
+```bash
+devcontainer up --workspace-folder /path/to/your/repo
+```
+Common causes: Docker daemon not started, insufficient disk space, or network issues pulling the image.
+
+**Slow first run**
+The first run downloads the Dev Container base image (can take 2–5 minutes depending on connection). Subsequent runs use Docker's cache and are much faster.
 
 **Agent hits max iterations and escalates**
 The agent tried but could not complete the task within the iteration limit. The escalation output shows the stage where it stopped, what was tried, and the last test output. Usually this means the task is too large — break it into smaller pieces.

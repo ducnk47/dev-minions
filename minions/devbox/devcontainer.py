@@ -33,7 +33,9 @@ class DevContainerDevbox(Devbox):
             capture_output=True, text=True, timeout=120,
         )
         if result.returncode != 0:
-            raise RuntimeError(f"devcontainer up failed:\n{result.stderr}")
+            # devcontainer writes errors to stdout, not stderr
+            output = (result.stdout + result.stderr).strip()
+            raise RuntimeError(f"devcontainer up failed:\n{output}")
 
     def wait_until_ready(self) -> None:
         # devcontainer up is synchronous — postCreateCommand completes before it returns

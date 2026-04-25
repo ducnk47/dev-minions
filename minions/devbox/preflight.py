@@ -1,10 +1,28 @@
 from __future__ import annotations
+import subprocess
 from minions.devbox.base import Devbox
 from minions.config import PartnerConfig
 
 
 class PreflightError(Exception):
     pass
+
+
+def check_host_prerequisites() -> None:
+    """Check host-level prerequisites before booting the devbox. Raises PreflightError fast."""
+    # Docker running?
+    r = subprocess.run(["docker", "info"], capture_output=True, timeout=10)
+    if r.returncode != 0:
+        raise PreflightError(
+            "Docker is not running. Start Docker Desktop (or run: sudo systemctl start docker) and try again."
+        )
+
+    # devcontainer CLI installed?
+    r = subprocess.run(["devcontainer", "--version"], capture_output=True, timeout=10)
+    if r.returncode != 0:
+        raise PreflightError(
+            "devcontainer CLI not found. Install it with: npm install -g @devcontainers/cli"
+        )
 
 
 def run_preflight_checks(devbox: Devbox, config: PartnerConfig) -> None:

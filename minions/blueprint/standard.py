@@ -7,19 +7,29 @@ from minions.blueprint.nodes import DeterministicNode, AgenticNode
 from minions.blueprint.context import BlueprintContext
 from minions.blueprint.prompts import PLAN_PROMPT, IMPL_PROMPT, FIX_PROMPT
 from minions.blueprint.risk import classify_pr_risk
-from minions.devbox.preflight import run_preflight_checks, PreflightError
+from minions.devbox.preflight import run_preflight_checks, check_host_prerequisites, PreflightError
 from minions.qualify.task import qualify_task
 from minions.rules.loader import load_rules_for_paths
 
 
 def _boot_devbox_handler(ctx: BlueprintContext) -> None:
+    try:
+        check_host_prerequisites()
+    except PreflightError as e:
+        print(f"\n[ABORT] {e}", file=sys.stderr)
+        sys.exit(1)
+
     from minions.devbox.devcontainer import DevContainerDevbox
-    devbox = DevContainerDevbox(
-        repo_path=ctx.repo_path,
-        language_fallback=ctx.partner_config.devbox.get("language_fallback", "node"),
-    )
-    devbox.start()
-    devbox.wait_until_ready()
+    try:
+        devbox = DevContainerDevbox(
+            repo_path=ctx.repo_path,
+            language_fallback=ctx.partner_config.devbox.get("language_fallback", "node"),
+        )
+        devbox.start()
+        devbox.wait_until_ready()
+    except RuntimeError as e:
+        print(f"\n[ABORT] Failed to boot devbox: {e}", file=sys.stderr)
+        sys.exit(1)
     ctx.devbox = devbox
 
 

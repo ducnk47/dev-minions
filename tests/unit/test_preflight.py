@@ -1,7 +1,7 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from minions.devbox.base import ExecResult
-from minions.devbox.preflight import run_preflight_checks, PreflightError
+from minions.devbox.preflight import run_preflight_checks, check_host_prerequisites, PreflightError
 from minions.config import PartnerConfig
 
 
@@ -49,3 +49,24 @@ def test_install_fails():
     devbox.exec.side_effect = lambda cmd, **kw: _fail("npm ERR!") if "npm install" in cmd else _ok()
     with pytest.raises(PreflightError, match="install"):
         run_preflight_checks(devbox, _make_config())
+
+
+def test_host_prerequisites_docker_not_running(mocker):
+    mock_run = mocker.patch("minions.devbox.preflight.subprocess.run")
+    mock_run.return_value = MagicMock(returncode=1)
+    with pytest.raises(PreflightError, match="Docker"):
+        check_host_prerequisites()
+
+
+def test_host_prerequisites_devcontainer_not_installed(mocker):
+    mock_run = mocker.patch("minions.devbox.preflight.subprocess.run")
+    # First call (docker info) succeeds, second call (devcontainer --version) fails
+    mock_run.side_effect = [MagicMock(returncode=0), MagicMock(returncode=1)]
+    with pytest.raises(PreflightError, match="devcontainer"):
+        check_host_prerequisites()
+
+
+def test_host_prerequisites_all_pass(mocker):
+    mock_run = mocker.patch("minions.devbox.preflight.subprocess.run")
+    mock_run.return_value = MagicMock(returncode=0)
+    check_host_prerequisites()  # should not raise
