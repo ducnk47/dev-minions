@@ -59,13 +59,22 @@ git clone <this-repo-url>
 cd dev-box-minions
 ```
 
-**2. Install Python dependencies**
+**2. Create a virtual environment and install dependencies**
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-This installs the `minion` CLI command and all dependencies.
+This installs the `minion` CLI command and all dependencies inside an isolated environment.
+
+> **Every time you open a new terminal**, you need to activate the virtual environment first:
+> ```bash
+> cd dev-box-minions
+> source .venv/bin/activate
+> ```
+> You'll know it's active when you see `(.venv)` at the start of your prompt.
 
 **3. Set your Anthropic API key**
 
@@ -210,6 +219,17 @@ The integration test runs the agent on a small fixture repo with a deliberate bu
 ---
 
 ## Troubleshooting
+
+**"externally-managed-environment" error when running pip**
+Your system Python is protected. Use a virtual environment:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+```
+
+**"command not found: minion" after install**
+The virtual environment is not active. Run `source .venv/bin/activate` first.
 
 **"Partner config not found"**
 Make sure the partner name matches a file in `configs/partners/`. Example: `--partner example_client` looks for `configs/partners/example_client.yml`.
