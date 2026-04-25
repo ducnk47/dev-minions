@@ -1,0 +1,2 @@
+This is a Python project. Always add type hints. Use pytest for tests.
+When handling division, always check for zero denominators.
