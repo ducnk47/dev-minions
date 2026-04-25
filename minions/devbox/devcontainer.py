@@ -8,6 +8,20 @@ from minions.devbox.base import Devbox, ExecResult
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 AGENT_PACKAGES = ["ripgrep", "jq"]
 
+# Markers used to detect repo language — checked in order, first match wins
+_LANGUAGE_MARKERS = [
+    ("python", ["pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile"]),
+    ("ruby",   ["Gemfile"]),
+    ("node",   ["package.json"]),
+]
+
+
+def _detect_language(repo_path: Path) -> str | None:
+    for language, markers in _LANGUAGE_MARKERS:
+        if any((repo_path / m).exists() for m in markers):
+            return language
+    return None
+
 
 class DevContainerDevbox(Devbox):
     def __init__(self, repo_path: str, language_fallback: str = "node"):
@@ -21,8 +35,9 @@ class DevContainerDevbox(Devbox):
         if dc_dir.exists():
             return  # use repo's own config
 
+        language = _detect_language(self.repo_path) or self.language_fallback
         dc_dir.mkdir(exist_ok=True)
-        template = TEMPLATES_DIR / f"{self.language_fallback}.json"
+        template = TEMPLATES_DIR / f"{language}.json"
         if not template.exists():
             template = TEMPLATES_DIR / "node.json"
         shutil.copy(template, dc_dir / "devcontainer.json")
